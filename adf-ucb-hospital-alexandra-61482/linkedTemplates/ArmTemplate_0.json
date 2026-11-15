@@ -1,0 +1,99 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Nombre de instancia de Data Factory",
+			"defaultValue": "adf-ucb-hospital-alexandra-61482"
+		},
+		"LS_AzureSQL_Hospital_password": {
+			"type": "secureString",
+			"metadata": "Cadena protegida para \"password\"de \"LS_AzureSQL_Hospital\""
+		},
+		"LS_AzureSQL_Hospital_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "sql-ucb-hospital-alexandra-61482.database.windows.net"
+		},
+		"LS_AzureSQL_Hospital_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "dw_hospital"
+		},
+		"LS_AzureSQL_Hospital_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "franklin"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_AzureSQL_Hospital')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Conexión a la base de datos del Data Warehouse hospitalario.",
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('LS_AzureSQL_Hospital_properties_typeProperties_server')]",
+					"database": "[parameters('LS_AzureSQL_Hospital_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('LS_AzureSQL_Hospital_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_AzureSQL_Hospital_password')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Validar_DW_Hospital')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Canalización para validar la conexión y consultar los registros del Data Warehouse hospitalario.",
+				"activities": [
+					{
+						"name": "Script_Validar_DW",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LS_AzureSQL_Hospital",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "SELECT 'BRONZE - PACIENTES' AS Tabla, COUNT(*) AS Registros\nFROM bronze.patients\n\nUNION ALL\n\nSELECT 'BRONZE - ADMISIONES', COUNT(*)\nFROM bronze.admissions\n\nUNION ALL\n\nSELECT 'BRONZE - DIAGNOSTICOS', COUNT(*)\nFROM bronze.diagnoses\n\nUNION ALL\n\nSELECT 'BRONZE - FACTURACION', COUNT(*)\nFROM bronze.billing\n\nUNION ALL\n\nSELECT 'SILVER - PACIENTES', COUNT(*)\nFROM silver.patients\n\nUNION ALL\n\nSELECT 'SILVER - ADMISIONES', COUNT(*)\nFROM silver.admissions\n\nUNION ALL\n\nSELECT 'SILVER - DIAGNOSTICOS', COUNT(*)\nFROM silver.diagnoses\n\nUNION ALL\n\nSELECT 'SILVER - FACTURACION', COUNT(*)\nFROM silver.billing;"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-11-15T01:24:02Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureSQL_Hospital')]"
+			]
+		}
+	]
+}
