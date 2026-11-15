@@ -1,37 +1,37 @@
 {
-	"name": "PL_Validar_DW_Hospital",
-	"properties": {
-		"description": "Canalización para validar la conexión y consultar los registros del Data Warehouse hospitalario.",
-		"activities": [
-			{
-				"name": "Script_Validar_DW",
-				"type": "Script",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "LS_AzureSQL_Hospital",
-					"type": "LinkedServiceReference"
-				},
-				"typeProperties": {
-					"scripts": [
-						{
-							"type": "Query",
-							"text": "SELECT 'BRONZE - PACIENTES' AS Tabla, COUNT(*) AS Registros\nFROM bronze.patients\n\nUNION ALL\n\nSELECT 'BRONZE - ADMISIONES', COUNT(*)\nFROM bronze.admissions\n\nUNION ALL\n\nSELECT 'BRONZE - DIAGNOSTICOS', COUNT(*)\nFROM bronze.diagnoses\n\nUNION ALL\n\nSELECT 'BRONZE - FACTURACION', COUNT(*)\nFROM bronze.billing\n\nUNION ALL\n\nSELECT 'SILVER - PACIENTES', COUNT(*)\nFROM silver.patients\n\nUNION ALL\n\nSELECT 'SILVER - ADMISIONES', COUNT(*)\nFROM silver.admissions\n\nUNION ALL\n\nSELECT 'SILVER - DIAGNOSTICOS', COUNT(*)\nFROM silver.diagnoses\n\nUNION ALL\n\nSELECT 'SILVER - FACTURACION', COUNT(*)\nFROM silver.billing;"
-						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
-				}
-			}
-		],
-		"annotations": [],
-		"lastPublishTime": "2026-11-15T01:24:02Z"
-	},
-	"type": "Microsoft.DataFactory/factories/pipelines"
+    "name": "PL_Validar_DW_Hospital",
+    "properties": {
+        "description": "Canalización para validar la conexión y consultar los registros del Data Warehouse hospitalario.",
+        "activities": [
+            {
+                "name": "Script_Validar_DW",
+                "type": "Script",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "linkedServiceName": {
+                    "referenceName": "LS_AzureSQL_Hospital",
+                    "type": "LinkedServiceReference"
+                },
+                "typeProperties": {
+                    "scripts": [
+                        {
+                            "type": "Query",
+                            "text": "SELECT 'BRONZE - PACIENTES' AS Tabla, COUNT(*) AS Registros\nFROM bronze.patients\n\nUNION ALL\n\nSELECT 'BRONZE - ADMISIONES', COUNT(*)\nFROM bronze.admissions\n\nUNION ALL\n\nSELECT 'BRONZE - DIAGNOSTICOS', COUNT(*)\nFROM bronze.diagnoses\n\nUNION ALL\n\nSELECT 'BRONZE - FACTURACION', COUNT(*)\nFROM bronze.billing\n\nUNION ALL\n\nSELECT 'SILVER - PACIENTES', COUNT(*)\nFROM silver.patients\n\nUNION ALL\n\nSELECT 'SILVER - ADMISIONES', COUNT(*)\nFROM silver.admissions\n\nUNION ALL\n\nSELECT 'SILVER - DIAGNOSTICOS', COUNT(*)\nFROM silver.diagnoses\n\nUNION ALL\n\nSELECT 'SILVER - FACTURACION', COUNT(*)\nFROM silver.billing;"
+                        }
+                    ],
+                    "scriptBlockExecutionTimeout": "02:00:00"
+                }
+            }
+        ],
+        "annotations": [],
+        "lastPublishTime": "2026-11-15T01:24:02Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
 }
